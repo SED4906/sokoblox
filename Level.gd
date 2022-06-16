@@ -55,12 +55,42 @@ const levels = [
 	[[[1,1,1,1,1],[2,2,2,2,1],[3,1,3,1,1],[1,3,1,3,1],[5,1,7,3,1],[9,1,11,3,1],[10,1,10,2,-1],[1,5,1,6,1],[2,6,2,7,1],[3,5,3,6,1],[5,5,7,5,1],[6,6,6,6,1],[5,7,7,7,1],[9,5,11,7,1],[10,6,10,7,-1],[13,1,14,4,1],[13,6,14,7,1]],
 	 [[6,2,6,2,4]]]
 ]
+
+var undos = []
+
 var current_level=0
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	setup(current_level)
 
+func undo():
+	var undo_to = []
+	if(len(undos) > 1):
+		undo_to = undos.pop_back()
+	else:
+		undo_to = undos[0]
+	$Layer0.clear()
+	$Layer1.clear()
+	var layer0 = undo_to[0]
+	var layer1 = undo_to[1]
+	for cell in layer0:
+		$Layer0.set_cell(cell[0],cell[1],cell[2])
+	for cell in layer1:
+		$Layer1.set_cell(cell[0],cell[1],cell[2])
+
+func make_undo():
+	var used_cells0 = $Layer0.get_used_cells()
+	var used_cells1 = $Layer1.get_used_cells()
+	var layer0 = []
+	var layer1 = []
+	for cell in used_cells0:
+		layer0.append([cell.x,cell.y,$Layer0.get_cellv(cell)])
+	for cell in used_cells1:
+		layer1.append([cell.x,cell.y,$Layer1.get_cellv(cell)])
+	undos.append([layer0,layer1])
+
 func setup(level):
+	undos = []
 	$Layer0.clear()
 	$Layer1.clear()
 	var layer0 = levels[level][0]
@@ -73,6 +103,8 @@ func setup(level):
 		for x in range(box[0],box[2]+1):
 			for y in range(box[1],box[3]+1):
 				$Layer1.set_cell(x,y,box[4])
+	make_undo()
+	$Label.text = String(current_level+1)
 
 func push_box(from, to, direction):
 	if $Layer1.get_cellv(to) == 2:
@@ -82,7 +114,6 @@ func push_box(from, to, direction):
 
 func move_block():
 	if Input.is_action_just_pressed("up"):
-		$Click0.play()
 		var red_cells=$Layer1.get_used_cells_by_id(3)
 		var black_cells=$Layer1.get_used_cells_by_id(4)
 		if len(red_cells) == 2:
@@ -96,6 +127,8 @@ func move_block():
 					$Layer1.set_cellv(black_cell,4)
 					$Layer1.set_cellv(red_cells[0],-1)
 					$Layer1.set_cellv(red_cells[1],-1)
+					$Click0.play()
+					return true
 			elif $Layer0.get_cellv(red_cells[0]+Vector2(0,-1)) != -1 and $Layer0.get_cellv(red_cells[1]+Vector2(0,-1)) != -1:
 				$Layer1.set_cellv(red_cells[0],-1)
 				$Layer1.set_cellv(red_cells[1],-1)
@@ -105,6 +138,8 @@ func move_block():
 					push_box(red_cells[1]+Vector2(0,-1),red_cells[1]+Vector2(0,-2),Vector2(0,-1))
 				$Layer1.set_cellv(red_cells[0]+Vector2(0,-1),3)
 				$Layer1.set_cellv(red_cells[1]+Vector2(0,-1),3)
+				$Click0.play()
+				return true
 		else:
 			var black_cell=black_cells[0]
 			if $Layer0.get_cellv(black_cell+Vector2(0,-2))==-1 and $Layer1.get_cellv(black_cell+Vector2(0,-1))==2:
@@ -118,8 +153,9 @@ func move_block():
 					push_box(black_cell+Vector2(0,-2),black_cell+Vector2(0,-3),Vector2(0,-1))
 				$Layer1.set_cellv(black_cell+Vector2(0,-1),3)
 				$Layer1.set_cellv(black_cell+Vector2(0,-2),3)
+				$Click0.play()
+				return true
 	elif Input.is_action_just_pressed("down"):
-		$Click0.play()
 		var red_cells=$Layer1.get_used_cells_by_id(3)
 		var black_cells=$Layer1.get_used_cells_by_id(4)
 		if len(red_cells) == 2:
@@ -133,6 +169,8 @@ func move_block():
 						$Layer1.set_cellv(black_cell,4)
 						$Layer1.set_cellv(red_cells[0],-1)
 						$Layer1.set_cellv(red_cells[1],-1)
+						$Click0.play()
+						return true
 			elif $Layer0.get_cellv(red_cells[0]-Vector2(0,-1)) != -1 and $Layer0.get_cellv(red_cells[1]-Vector2(0,-1)) != -1:
 				$Layer1.set_cellv(red_cells[0],-1)
 				$Layer1.set_cellv(red_cells[1],-1)
@@ -142,6 +180,8 @@ func move_block():
 					push_box(red_cells[1]-Vector2(0,-1),red_cells[1]-Vector2(0,-2),Vector2(0,1))
 				$Layer1.set_cellv(red_cells[0]-Vector2(0,-1),3)
 				$Layer1.set_cellv(red_cells[1]-Vector2(0,-1),3)
+				$Click0.play()
+				return true
 		else:
 			var black_cell=black_cells[0]
 			if $Layer0.get_cellv(black_cell-Vector2(0,-2))==-1 and $Layer1.get_cellv(black_cell-Vector2(0,-1))==2:
@@ -155,8 +195,9 @@ func move_block():
 					push_box(black_cell-Vector2(0,-2),black_cell-Vector2(0,-3),Vector2(0,1))
 				$Layer1.set_cellv(black_cell-Vector2(0,-1),3)
 				$Layer1.set_cellv(black_cell-Vector2(0,-2),3)
+				$Click0.play()
+				return true
 	elif Input.is_action_just_pressed("left"):
-		$Click0.play()
 		var red_cells=$Layer1.get_used_cells_by_id(3)
 		var black_cells=$Layer1.get_used_cells_by_id(4)
 		if len(red_cells) == 2:
@@ -170,6 +211,8 @@ func move_block():
 						push_box(red_cells[1]-Vector2(1,0),red_cells[1]-Vector2(2,0),Vector2(-1,0))
 					$Layer1.set_cellv(red_cells[0]-Vector2(1,0),3)
 					$Layer1.set_cellv(red_cells[1]-Vector2(1,0),3)
+					$Click0.play()
+					return true
 			else:
 				var black_cell=red_cells[0]-Vector2(1,0)
 				if red_cells[1].x < red_cells[0].x:
@@ -180,6 +223,8 @@ func move_block():
 					$Layer1.set_cellv(black_cell,4)
 					$Layer1.set_cellv(red_cells[0],-1)
 					$Layer1.set_cellv(red_cells[1],-1)
+					$Click0.play()
+					return true
 		else:
 			var black_cell=black_cells[0]
 			if $Layer0.get_cellv(black_cell-Vector2(2,0))==-1 and $Layer1.get_cellv(black_cell-Vector2(1,0))==2:
@@ -193,8 +238,9 @@ func move_block():
 					push_box(black_cell-Vector2(2,0),black_cell-Vector2(3,0),Vector2(-1,0))
 				$Layer1.set_cellv(black_cell-Vector2(1,0),3)
 				$Layer1.set_cellv(black_cell-Vector2(2,0),3)
+				$Click0.play()
+				return true
 	elif Input.is_action_just_pressed("right"):
-		$Click0.play()
 		var red_cells=$Layer1.get_used_cells_by_id(3)
 		var black_cells=$Layer1.get_used_cells_by_id(4)
 		if len(red_cells) == 2:
@@ -208,6 +254,8 @@ func move_block():
 						push_box(red_cells[1]+Vector2(1,0),red_cells[1]+Vector2(2,0),Vector2(1,0))
 					$Layer1.set_cellv(red_cells[0]+Vector2(1,0),3)
 					$Layer1.set_cellv(red_cells[1]+Vector2(1,0),3)
+					$Click0.play()
+					return true
 			else:
 				var black_cell=red_cells[0]+Vector2(1,0)
 				if red_cells[1].x > red_cells[0].x:
@@ -218,6 +266,8 @@ func move_block():
 					$Layer1.set_cellv(black_cell,4)
 					$Layer1.set_cellv(red_cells[0],-1)
 					$Layer1.set_cellv(red_cells[1],-1)
+					$Click0.play()
+					return true
 		else:
 			var black_cell=black_cells[0]
 			if $Layer0.get_cellv(black_cell+Vector2(2,0))==-1 and $Layer1.get_cellv(black_cell+Vector2(1,0))==2:
@@ -231,13 +281,20 @@ func move_block():
 					push_box(black_cell+Vector2(2,0),black_cell+Vector2(3,0),Vector2(1,0))
 				$Layer1.set_cellv(black_cell+Vector2(1,0),3)
 				$Layer1.set_cellv(black_cell+Vector2(2,0),3)
+				$Click0.play()
+				return true
+	return false
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
 	if Input.is_action_just_pressed("reset"):
 		$Click1.play()
 		setup(current_level)
-	move_block()
+	if Input.is_action_just_pressed("undo"):
+		$Click1.play()
+		undo()
+	if move_block():
+		make_undo()
 	var white_cells=$Layer1.get_used_cells_by_id(2)
 	for white_cell in white_cells:
 		if $Layer0.get_cellv(white_cell) == -1:
