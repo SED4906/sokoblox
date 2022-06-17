@@ -143,7 +143,6 @@ script = ExtResource( 6 )
 [node name="Layer0" type="TileMap" parent="."]
 tile_set = SubResource( 1 )
 format = 1
-tile_data = PoolIntArray( 65537, 1, 0, 65538, 1, 0, 65539, 1, 0, 65548, 1, 0, 65549, 6, 0, 131073, 1, 0, 131074, 5, 0, 131075, 1, 0, 131076, 1, 0, 131080, 6, 0, 131084, 7, 0, 131085, 1, 0, 196609, 1, 0, 196610, 1, 0, 196611, 1, 0, 196612, 1, 0, 262145, 1, 0, 262146, 1, 0, 262147, 1, 0, 262154, 6, 0, 327681, 1, 0, 327682, 1, 0, 327683, 1, 0, 327684, 1, 0, 327686, 2, 0, 327687, 2, 0, 327688, 2, 0, 393217, 1, 0, 393218, 7, 0, 393219, 1, 0, 393220, 1, 0, 393222, 2, 0, 393223, 4, 0, 393224, 2, 0, 393228, 6, 0, 458753, 1, 0, 458754, 1, 0, 458755, 1, 0, 458758, 2, 0, 458759, 2, 0, 458760, 2, 0 )
 
 [node name="Layer1" type="TileMap" parent="."]
 tile_set = SubResource( 1 )
@@ -159,8 +158,19 @@ stream = ExtResource( 9 )
 stream = ExtResource( 10 )
 
 [node name="Label" type="Label" parent="."]
-margin_top = 533.0
+margin_top = 573.0
 margin_right = 40.0
-margin_bottom = 600.0
+margin_bottom = 640.0
 theme = SubResource( 3 )
-text = "0"
+
+[node name="FileDialog" type="FileDialog" parent="."]
+margin_right = 315.0
+margin_bottom = 640.0
+window_title = "Open a File"
+mode = 0
+access = 2
+filters = PoolStringArray( "*.txt" )
+current_dir = "/GodotAWeek/1"
+current_path = "/GodotAWeek/1/"
+
+[connection signal="file_selected" from="FileDialog" to="." method="_on_FileDialog_file_selected"]
